@@ -25,7 +25,6 @@ if (function_exists('ob_implicit_flush')) {
 echo '<h1>JDTech Database Setup (Debug)</h1>';
 echo '<pre style="background: #f5f5f5; padding: 20px; white-space: pre-wrap; word-wrap: break-word;">';
 
-default:
 function normalizeSql(string $sql): string {
     $sql = preg_replace('/\/\*.*?\*\//s', '', $sql);
     $sql = preg_replace('/^\s*--.*$/m', '', $sql);
