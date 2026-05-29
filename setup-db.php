@@ -51,6 +51,10 @@ function executeSqlFile(string $path, int &$count, array &$errors): void {
     }
 
     $statements = splitSqlStatements($content);
+    echo "  📌 split into " . count($statements) . " statements\n";
+    if (function_exists('flush')) {
+        flush();
+    }
     $count = 0;
     $errors = [];
     foreach ($statements as $i => $statement) {
