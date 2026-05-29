@@ -11,63 +11,91 @@ ini_set('display_errors', 1);
 require_once 'includes/config.php';
 require_once 'includes/db.php';
 
-echo '<h1>JDTech Database Setup</h1>';
-echo '<pre style="background: #f5f5f5; padding: 20px; white-space: pre-wrap; word-wrap: break-word;">';
+function normalizeSql(string $sql): string {
+    $sql = preg_replace('/\/\*.*?\*\//s', '', $sql);
+    $sql = preg_replace('/^\s*--.*$/m', '', $sql);
+    $sql = preg_replace('/^\s*USE\s+`[^`]+`\s*;?/mi', '', $sql);
+    $sql = preg_replace('/^\s*CREATE\s+DATABASE.*$/mi', '', $sql);
+    return trim($sql);
+}
 
-try {
-    // Read and execute project.sql
-    $sqlFile = __DIR__ . '/database/project.sql';
-    echo "📂 Looking for: $sqlFile\n";
-    
-    if (!file_exists($sqlFile)) {
-        echo "❌ File not found: $sqlFile\n";
-        echo "Current directory: " . getcwd() . "\n";
-        echo "Files in database/: " . implode(', ', glob(__DIR__ . '/database/*')) . "\n";
-        die();
+function splitSqlStatements(string $sql): array {
+    $sql = normalizeSql($sql);
+    $parts = array_map('trim', explode(';', $sql));
+    return array_filter($parts, fn($part) => $part !== '');
+}
+
+function executeSqlFile(string $path, int &$count, array &$errors): void {
+    global $conn;
+
+    if (!file_exists($path)) {
+        throw new RuntimeException("SQL file not found: $path");
     }
-    
-    $sql = file_get_contents($sqlFile);
-    echo "✅ Read schema file (" . strlen($sql) . " bytes)\n";
-    
-    if (!$sql) {
-        die('❌ Error: Schema file is empty\n');
+
+    $content = file_get_contents($path);
+    if ($content === false) {
+        throw new RuntimeException("Unable to read file: $path");
     }
 
-    // Remove SQL comments and split by semicolons
-    $sql = preg_replace('/\/\*.*?\*\//s', '', $sql); // strip block comments
-    $sql = preg_replace('/^\s*--.*$/m', '', $sql);      // strip line comments
-    $statements = array_filter(array_map('trim', explode(';', $sql)), function($s) {
-        return !empty($s);
-    });
-
-    echo "📊 Found " . count($statements) . " SQL statements to execute\n\n";
-
+    $statements = splitSqlStatements($content);
     $count = 0;
     $errors = [];
     foreach ($statements as $i => $statement) {
         if (runQuery($statement)) {
             $count++;
         } else {
-            global $conn;
             $error = mysqli_error($conn);
-            if (strpos($error, 'already exists') === false) {
+            if (stripos($error, 'already exists') === false) {
                 $errors[] = "Statement " . ($i + 1) . ": " . $error;
-            } else {
-                echo "ℹ️ Table already exists (skipped)\n";
             }
         }
     }
+}
 
-    echo "\n✅ Database setup complete! Executed $count statements.\n";
-    
-    if (!empty($errors)) {
-        echo "\n⚠️ Errors encountered:\n";
-        foreach ($errors as $error) {
+echo '<h1>JDTech Database Setup</h1>';
+echo '<pre style="background: #f5f5f5; padding: 20px; white-space: pre-wrap; word-wrap: break-word;">';
+
+try {
+    $projectFile = __DIR__ . '/database/project.sql';
+    echo "📂 Loading schema: $projectFile\n";
+    $sql = file_get_contents($projectFile);
+    if ($sql === false) {
+        throw new RuntimeException("Could not read schema file: $projectFile");
+    }
+    echo "✅ Read schema file (" . strlen($sql) . " bytes)\n";
+
+    executeSqlFile($projectFile, $schemaCount, $schemaErrors);
+    echo "📊 Executed $schemaCount schema statements.\n";
+    if (!empty($schemaErrors)) {
+        echo "\n⚠️ Schema errors:\n";
+        foreach ($schemaErrors as $error) {
             echo "  - $error\n";
         }
     }
 
-    // Verify tables exist
+    $seedFile = __DIR__ . '/database/seed.sql';
+    if (file_exists($seedFile)) {
+        echo "\n📂 Loading seed data: $seedFile\n";
+        $seedSql = file_get_contents($seedFile);
+        if ($seedSql === false) {
+            throw new RuntimeException("Could not read seed file: $seedFile");
+        }
+        echo "✅ Read seed file (" . strlen($seedSql) . " bytes)\n";
+
+        executeSqlFile($seedFile, $seedCount, $seedErrors);
+        echo "📊 Executed $seedCount seed statements.\n";
+        if (!empty($seedErrors)) {
+            echo "\n⚠️ Seed errors:\n";
+            foreach ($seedErrors as $error) {
+                echo "  - $error\n";
+            }
+        }
+    } else {
+        echo "\n⚠️ No seed file found: $seedFile\n";
+    }
+
+    echo "\n✅ Database setup complete!\n";
+
     echo "\n📋 Verifying tables:\n";
     $tables = ['admin', 'users', 'categories', 'items', 'orders', 'homepage'];
     $allExist = true;
@@ -75,9 +103,11 @@ try {
         $result = fetchOne("SELECT 1 FROM information_schema.tables WHERE table_schema = '" . DB_NAME . "' AND table_name = '$table'");
         $status = $result ? '✅' : '❌';
         echo "  - $table: $status\n";
-        if (!$result) $allExist = false;
+        if (!$result) {
+            $allExist = false;
+        }
     }
-    
+
     if ($allExist) {
         echo "\n🎉 All tables created successfully!\n";
     } else {
