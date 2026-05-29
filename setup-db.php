@@ -89,6 +89,8 @@ try {
     }
     echo "✅ Read schema file (" . strlen($sql) . " bytes)\n";
 
+    $schemaCount = 0;
+    $schemaErrors = [];
     executeSqlFile($projectFile, $schemaCount, $schemaErrors);
     echo "📊 Executed $schemaCount schema statements.\n";
     if (!empty($schemaErrors)) {
@@ -107,6 +109,8 @@ try {
         }
         echo "✅ Read seed file (" . strlen($seedSql) . " bytes)\n";
 
+        $seedCount = 0;
+        $seedErrors = [];
         executeSqlFile($seedFile, $seedCount, $seedErrors);
         echo "📊 Executed $seedCount seed statements.\n";
         if (!empty($seedErrors)) {
