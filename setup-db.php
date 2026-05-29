@@ -11,6 +11,13 @@ ini_set('display_errors', 1);
 require_once 'includes/config.php';
 require_once 'includes/db.php';
 
+set_time_limit(120);
+if (function_exists('ob_implicit_flush')) {
+    ob_implicit_flush(true);
+}
+
+echo '<script>console.log("setup-db: script started");</script>';
+
 function normalizeSql(string $sql): string {
     $sql = preg_replace('/\/\*.*?\*\//s', '', $sql);
     $sql = preg_replace('/^\s*--.*$/m', '', $sql);
@@ -41,10 +48,18 @@ function executeSqlFile(string $path, int &$count, array &$errors): void {
     $count = 0;
     $errors = [];
     foreach ($statements as $i => $statement) {
+        $short = trim(str_replace("\n", ' ', $statement));
+        $short = substr($short, 0, 120);
+        echo "  -> executing statement " . ($i + 1) . "/" . count($statements) . ": $short\n";
+        if (function_exists('flush')) {
+            flush();
+        }
         if (runQuery($statement)) {
             $count++;
+            echo "     ✅ ok\n";
         } else {
             $error = mysqli_error($conn);
+            echo "     ❌ error: $error\n";
             if (stripos($error, 'already exists') === false) {
                 $errors[] = "Statement " . ($i + 1) . ": " . $error;
             }
