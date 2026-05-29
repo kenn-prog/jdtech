@@ -1,0 +1,32 @@
+/* ============================================================
+   JDTech — Admin-specific styles
+   PURPOSE: Styles only loaded on admin pages.
+            Regular users never download this file.
+   ============================================================ */
+
+/* Status select dropdown in orders table */
+.status-select {
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  font-size: 13px;
+  font-family: var(--font-body);
+  background: var(--bg);
+  cursor: pointer;
+}
+
+/* Rich text area in settings */
+.settings-form textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+/* Admin user pill in topbar */
+.admin-user {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--muted);
+}
