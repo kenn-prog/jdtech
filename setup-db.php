@@ -123,6 +123,29 @@ try {
         echo "\n⚠️ No seed file found: $seedFile\n";
     }
 
+    // Make sure any plaintext passwords in admin/users tables get hashed
+    echo "\n🔐 Fixing plaintext passwords if present...\n";
+    $updated = 0;
+    $plainAdmins = fetchAll("SELECT id, password FROM admin WHERE password NOT LIKE '\$2y\$%' AND password NOT LIKE '\$2b\$%' LIMIT 20");
+    foreach ($plainAdmins as $row) {
+        $newHash = password_hash($row['password'], PASSWORD_DEFAULT, ['cost' => BCRYPT_COST]);
+        runQuery("UPDATE admin SET password = '" . escape($newHash) . "' WHERE id = " . (int) $row['id']);
+        $updated++;
+        echo "  - Updated admin id=" . (int) $row['id'] . "\n";
+    }
+    $plainUsers = fetchAll("SELECT id, password FROM users WHERE password NOT LIKE '\$2y\$%' AND password NOT LIKE '\$2b\$%' LIMIT 100");
+    foreach ($plainUsers as $row) {
+        $newHash = password_hash($row['password'], PASSWORD_DEFAULT, ['cost' => BCRYPT_COST]);
+        runQuery("UPDATE users SET password = '" . escape($newHash) . "' WHERE id = " . (int) $row['id']);
+        $updated++;
+        echo "  - Updated user id=" . (int) $row['id'] . "\n";
+    }
+    if ($updated === 0) {
+        echo "  - No plaintext passwords found.\n";
+    } else {
+        echo "  - Hashed $updated plaintext password(s).\n";
+    }
+
     echo "\n✅ Database setup complete!\n";
 
     echo "\n📋 Verifying tables:\n";

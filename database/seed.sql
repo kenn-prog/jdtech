@@ -9,12 +9,12 @@
 USE `jdtech`;
 
 -- ── Default Admin Account ─────────────────────────────────
--- Password: admin123 (bcrypt hash)
+-- Password: admin123
 INSERT IGNORE INTO `admin` (username, email, password)
 VALUES (
   'admin',
   'admin@jdtech.com',
-  'admin123'
+  '$2y$10$uRu5yW77f0iQQtHzvpcije/Q86Z6TZmxje2rM9qSi7FTWUdzI8fme'
 );
 
 -- ── Demo User Account ───────────────────────────────────────
@@ -22,7 +22,7 @@ VALUES (
 INSERT IGNORE INTO `users` (email, password, role, first_name, last_name, phone, joined_at, avatar)
 VALUES (
   'user@jdtech.com',
-  'user123',
+  '$2y$10$ZpDw0l23kisTwFdZPqj37e9VxZVluW2RQng76I7Lv6srjmjr1Myqu',
   'user',
   'Juan',
   'Dela Cruz',
