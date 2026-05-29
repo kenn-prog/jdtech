@@ -82,7 +82,8 @@ include 'includes/navbar.php';
 // Load store contact info from the homepage API
 async function loadContactInfo() {
   try {
-    const res  = await fetch('api/products.php?action=get_homepage');
+    const res  = await fetch(window.APP_URL + '/api/products.php?action=get_homepage');
+    if (!res.ok) throw new Error(`Homepage API returned ${res.status}`);
     const data = await res.json();
     if (!data.ok || !data.homepage) return;
     const hp = data.homepage;

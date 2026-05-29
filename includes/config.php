@@ -9,8 +9,14 @@
 define('APP_NAME',    'JDTech');
 define('APP_VERSION', '1.0.0');
 // Read APP_URL and APP_ENV from environment when available (Railway, Render, etc.)
-define('APP_URL',     getenv('APP_URL') ?: 'http://localhost/jdtech');
-define('APP_ENV',     getenv('APP_ENV') ?: 'development');               // 'development' or 'production'
+// Normalize APP_URL: ensure it has a scheme and no trailing slash.
+$app_url = getenv('APP_URL') ?: 'http://localhost/jdtech';
+if (!preg_match('#^https?://#i', $app_url)) {
+    $app_url = 'https://' . $app_url;
+}
+$app_url = rtrim($app_url, '/');
+define('APP_URL', $app_url);
+define('APP_ENV', getenv('APP_ENV') ?: 'development');               // 'development' or 'production'
 
 // ── Database Settings ─────────────────────────────────────
 // These are loaded from .env in production.

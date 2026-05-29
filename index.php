@@ -34,7 +34,7 @@ include 'includes/navbar.php';
       </div>
     </div>
     <div class="hero-image">
-      <img src="assets/images/hero-devices.jpg" alt="Latest gadgets" id="heroImage" width="1200" height="1200" />
+      <img src="<?= APP_URL ?>/assets/images/mission-photo.jpg" alt="Latest gadgets" id="heroImage" width="1200" height="1200" />
     </div>
   </div>
 </section>
@@ -133,11 +133,19 @@ include 'includes/navbar.php';
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
 <script>
+// Build a full URL from the app root for API and image assets
+function buildAppUrl(path) {
+  if (!path) return '';
+  if (/^(https?:)?\/\//.test(path)) return path;
+  return `${window.APP_URL}/${path.replace(/^\/+/, '')}`;
+}
+
 // Load homepage data and products from our PHP API
 async function initHomepage() {
   try {
     // Fetch homepage content
-    const hpRes  = await fetch('api/products.php?action=get_homepage');
+    const hpRes  = await fetch(buildAppUrl('api/products.php?action=get_homepage'));
+    if (!hpRes.ok) throw new Error(`Homepage API returned ${hpRes.status}`);
     const hpData = await hpRes.json();
     // Normalize homepage data object for use below
     const hp = (hpData.ok && hpData.homepage) ? hpData.homepage : {};
@@ -158,7 +166,7 @@ async function initHomepage() {
       // If admin uploaded a hero image, use it
       try {
         if (hp.heroImage) {
-          const img = document.getElementById('heroImage'); if (img) img.src = hp.heroImage;
+          const img = document.getElementById('heroImage'); if (img) img.src = buildAppUrl(hp.heroImage);
         }
       } catch(e) { console.warn('Hero image update failed', e); }
 
@@ -193,7 +201,8 @@ async function initHomepage() {
     } catch(e) { console.warn('Testimonials render failed', e); }
 
     // Fetch products
-    const prRes  = await fetch('api/products.php?action=get_products');
+    const prRes  = await fetch(buildAppUrl('api/products.php?action=get_products'));
+    if (!prRes.ok) throw new Error(`Products API returned ${prRes.status}`);
     const prData = await prRes.json();
     const products = prData.ok ? prData.products : [];
     window.homepageProducts = products;

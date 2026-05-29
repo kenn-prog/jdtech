@@ -22,6 +22,19 @@ require_once '../includes/session.php';
 require_once '../includes/db.php';
 require_once '../includes/functions.php';
 
+set_error_handler(function ($errno, $errstr, $errfile, $errline) {
+    http_response_code(500);
+    header('Content-Type: application/json');
+    echo json_encode(['ok' => false, 'msg' => 'Internal server error.', 'error' => $errstr]);
+    exit;
+});
+set_exception_handler(function ($exception) {
+    http_response_code(500);
+    header('Content-Type: application/json');
+    echo json_encode(['ok' => false, 'msg' => 'Internal server error.', 'error' => $exception->getMessage()]);
+    exit;
+});
+
 // Always respond with JSON
 header('Content-Type: application/json');
 
