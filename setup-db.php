@@ -7,6 +7,12 @@
 
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
+register_shutdown_function(function() {
+    $err = error_get_last();
+    if ($err) {
+        echo "\nSHUTDOWN ERROR: {$err['message']} in {$err['file']} on line {$err['line']}\n";
+    }
+});
 
 require_once 'includes/config.php';
 require_once 'includes/db.php';
