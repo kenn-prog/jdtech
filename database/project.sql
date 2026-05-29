@@ -18,11 +18,8 @@
 -- ============================================================
 
 -- Create and use the database
-CREATE DATABASE IF NOT EXISTS `jdtech`
-  CHARACTER SET utf8mb4
-  COLLATE utf8mb4_unicode_ci;
-
-USE `jdtech`;
+-- NOTE: Database creation and selection is handled by PHP in includes/db.php
+-- The USE statement was removed to support Railway (database='railway') and local dev (database='jdtech')
 
 -- ── admin table ───────────────────────────────────────────
 -- Stores admin login credentials.
