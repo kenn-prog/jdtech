@@ -24,7 +24,7 @@ define('APP_ENV', getenv('APP_ENV') ?: 'development');               // 'develop
 define('DB_HOST',     getenv('DB_HOST')     ?: '127.0.0.1');
 define('DB_USER',     getenv('DB_USER')     ?: 'root');
 define('DB_PASS',     getenv('DB_PASS')     ?: '');
-define('DB_NAME',     getenv('DB_NAME')     ?: 'jdtech');
+define('DB_NAME',     getenv('DB_NAME')     ?: 'railway');
 define('DB_CHARSET',  'utf8mb4');
 
 // ── Upload Settings ───────────────────────────────────────
