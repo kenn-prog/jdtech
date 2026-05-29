@@ -33,9 +33,11 @@ try {
         die('❌ Error: Schema file is empty\n');
     }
 
-    // Split by semicolons and execute each statement
+    // Remove SQL comments and split by semicolons
+    $sql = preg_replace('/\/\*.*?\*\//s', '', $sql); // strip block comments
+    $sql = preg_replace('/^\s*--.*$/m', '', $sql);      // strip line comments
     $statements = array_filter(array_map('trim', explode(';', $sql)), function($s) {
-        return !empty($s) && !preg_match('/^\s*--/', $s) && !preg_match('/^\s*\/\*/', $s);
+        return !empty($s);
     });
 
     echo "📊 Found " . count($statements) . " SQL statements to execute\n\n";
