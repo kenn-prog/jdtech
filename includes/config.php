@@ -8,8 +8,9 @@
 // ── App Settings ──────────────────────────────────────────
 define('APP_NAME',    'JDTech');
 define('APP_VERSION', '1.0.0');
-define('APP_URL',     'http://localhost/jdtech');   // Change for production
-define('APP_ENV',     'development');               // 'development' or 'production'
+// Read APP_URL and APP_ENV from environment when available (Railway, Render, etc.)
+define('APP_URL',     getenv('APP_URL') ?: 'http://localhost/jdtech');
+define('APP_ENV',     getenv('APP_ENV') ?: 'development');               // 'development' or 'production'
 
 // ── Database Settings ─────────────────────────────────────
 // These are loaded from .env in production.
